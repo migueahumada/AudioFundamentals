@@ -161,7 +161,8 @@ void AudioFile::encodeNew(const char* filename)
 
 	file.write(reinterpret_cast<char*>(&waveHeader), sizeof(WAVEHEADER));
 	file.write(reinterpret_cast<char*>(m_samples), m_audioDataSize);
-
+	
+	file.close();
 }
 
 
