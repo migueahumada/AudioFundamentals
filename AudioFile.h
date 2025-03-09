@@ -1,5 +1,18 @@
 #pragma once
 
+#ifdef _WIN32 //Little Endian
+	#define fourccRIFF 'FFIR'
+	#define fourccDATA 'atad'
+	#define fourccFMT ' tmf'
+	#define fourccWAVE 'EVAW'
+
+#endif // define _WIN32
+
+#include <fstream>
+
+using std::fstream;
+
+//To write
 struct RIFF_CHUNK {
 	long	chunkID; //BIG
 	long	chunkSize;
@@ -29,6 +42,17 @@ struct WAVEHEADER {
 };
 
 
+//To read
+struct WAVE_FORMAT {
+	unsigned short	audioFormat;
+	unsigned short	numChannels;
+	unsigned long	sampleRate;
+	unsigned long	byteRate;
+	unsigned short	blockAlign;
+	unsigned short	bitsPerSample;
+};
+
+
 namespace BIT_DEPTH {
 	enum E {
 		B8,
@@ -40,23 +64,8 @@ namespace BIT_DEPTH {
 
 struct FloatSample {
 	FloatSample() = default;
-	FloatSample(int data) {
+	FloatSample(unsigned char data) {
 		
-	}
-
-	void normalize(int data) {
-		int minValue = -32768;
-		int maxValue = 32767;
-
-		//Normalization formula
-		m_sample = (data - minValue) / static_cast<float>(maxValue - minValue);
-		if (data < 0) {
-			m_sample = -m_sample;
-		}
-
-		//Clamp
-		m_sample > 1.0f ? 1.0f : m_sample;
-		m_sample < -1.0f ? -1.0f : m_sample;
 	}
 
 	float m_sample;
@@ -107,9 +116,12 @@ public:
 
 	//Reads a wav file
 	void decode(const char* filename);
+
 	
 	//Creates a new wav file with audio info
 	void encode(const char* filename);
+
+	void encodeNew(const char* filename);
 
 	//How many bytes are the per sample? 32 | 24 | 16 | 8
 	inline int getBitDepth() const{
@@ -127,13 +139,17 @@ public:
 	}
 
 	//Duration of the sound in seconds
-	int getDuration() const {
+	float getDuration() const {
 		return m_duration;
 	}
 
 	//Get samples = duration * sample rate
 	int getNumSamples() const {
 		return getDuration() * getSampleRate() * getNumChannels();
+	}
+
+	unsigned char* getSampleData() const {
+		return m_samples;
 	}
 
 
@@ -148,18 +164,19 @@ public:
 		44100Hz / 1s * 2canales 
 		44100 * numchannels * bitdepth / 8 = bytes for 1 second
 		samplerate * numchannels * bytespersample * duration = bytes
+
+		DURATION = BYTES/ SAMPLERATE * NUMCHANNEL * BYTESPERSAMPLE
 	*/
 
-
+	//DATA BYTES -> 568496
 
 protected:
-	int* m_samples = nullptr;
-
+	unsigned char* m_samples = nullptr;
 	int m_bitDepth = 0;
 	int m_sampleRate = 0;
 	int m_numChannels = 0;
 	int m_duration = 0;
-	
+	int m_audioDataSize = 0;
 
 	//int audioBlock = 0;
 };

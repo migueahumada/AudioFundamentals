@@ -29,19 +29,9 @@ void callback(float* buffer, int channels, int frames, void* cookie) {
 
 int main() {
 
-	/*const int samples = 8;
-
-	float* read = new float[samples * 2];
-	float* write;
-
-	memset(read,0,samples * 2 * sizeof(float));
-
-	write = read + samples;*/
-
-	AudioFile audiofile(48000,2,BIT_DEPTH::B16,10);
-	//audiofile.decode("Audio.wav");
-	audiofile.encode("Prueba.wav");
-
+	AudioFile sound;
+	sound.decode("./SFX_StoneDoor_Open_01.wav");
+	
 	return 0;
 }
 
